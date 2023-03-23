@@ -43,12 +43,12 @@ location = {Beijing, China}
  ```
 
 ### Environment and installation
-Requires **Python 3.6**
+Requires **Python 3.7**
 
 Clone the repository, install required packages and resources via pip. 
 
 ```
-pip install requirements.txt
+pip install -r requirements.txt
 python setup.py
 ```
 Some troubleshooting information is found [here](INSTALLATION.md).

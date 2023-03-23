@@ -6,7 +6,7 @@ pymining==0.2
 levenshtein==0.12.0
 wikipedia==1.4.0
 eventlet==0.31.0
-nltk==3.6.4
+nltk==3.6.5
 graphene==2.1.8
 stanfordnlp==0.1.2
 munkres==1.1.4
@@ -15,4 +15,13 @@ gensim==3.8.3
 pymagnitude==0.1.143
 google==2.0.1
 shortuuid==1.0.1
-spacy==2.0.18
+spacy==2.1.0
+# python -m spacy download en
+allennlp==0.9.0
+matplotlib
+overrides==3.1.0
+lz4
+xxhash
+annoy
+fasteners
+

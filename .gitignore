@@ -1,6 +1,7 @@
 conf.ini
 .idea
 .idea/
+.vscode 
 
 # Created by .ignore support plugin (hsz.mobi)
 ### Python template
@@ -177,6 +178,7 @@ data/exported_old/*
 data/mturk_ids_configuration.csv
 data/ECBplus-prep/
 
+resources
 /resources/tmp/*
 /cdcr/visualization/run_visualization/vis_app/static/data/*
 
