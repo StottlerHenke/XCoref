@@ -19,10 +19,8 @@ Please contact Shany for questions about the original model and code.
     * PyTorch 0.4.0 with CUDA 9.0 on Linux can be installed using the command:
     `pip install https://download.pytorch.org/whl/cu90/torch-0.4.0-cp36-cp36m-linux_x86_64.whl`
     * torch 1.2.0 and torchvision 0.4.0 for different OS: https://pytorch.org/get-started/previous-versions/#v120
-    `pip install torch==1.2.0+cu92 torchvision==0.4.0+cu92 -f https://download.pytorch.org/whl/torch_stable.html --user` 
-    (if you experience troubles, try without "user" option and then with it)
-    If torchvision does not show up in a list of installed packages, run `pip install torchvision` and 
-    then rerun the installation with the version above.
+        * macOS: `pip install torch==1.2.0 torchvision==0.4.0`
+        * **arm64 macOS**: In order to run these older versions of torch/pytorch on an ARM-based Mac, **you need to run within a _rosetta2_-enabled x86_64 environment**. I found it easiest to [Install Miniconda x86_64 & Apple M1 side by side](https://towardsdatascience.com/how-to-install-miniconda-x86-64-apple-m1-side-by-side-on-mac-book-m1-a476936bfaf0) and then create an x86_64 Conda environment.
 * [AllenNLP](https://allennlp.org/) `pip install allennlp==0.9.0`
 
 ## Download models and libraries

@@ -24,4 +24,7 @@ lz4
 xxhash
 annoy
 fasteners
-
+# Old version of Torch/PyTorch for EECDCR;
+# refer to `cdcr/entities/eecdcr/README.md`
+torch==1.2.0
+torchvision==0.4.0
