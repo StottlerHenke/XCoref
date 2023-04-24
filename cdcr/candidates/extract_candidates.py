@@ -205,6 +205,8 @@ class CandidatePhrasesExtractor:
         # small_phrase = [t.lower() for t in mention.tokens_str.split(" ")]
         if search_window:
             sents = doc.sentences[max(mention.sent_id - search_window, 0): mention.sent_id + search_window + 1]
+        elif mention.sent_id < 0:
+            sents = doc.sentences
         else:
             sents = [doc.sentences[mention.sent_id]]
 
@@ -236,6 +238,8 @@ class CandidatePhrasesExtractor:
         small_phrase = [t.lower() for t in mention.tokens_str.split(" ")]
         if search_window:
             sents = doc.sentences[max(mention.sent_id - search_window, 0): mention.sent_id + search_window + 1]
+        elif mention.sent_id < 0:
+            sents = doc.sentences
         else:
             sents = [doc.sentences[mention.sent_id]]
 
