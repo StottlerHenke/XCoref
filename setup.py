@@ -15,6 +15,7 @@ import gdown
 import gzip
 import shutil
 import spacy
+import cdcr.logger as logging
 from cdcr.config import GLOVE_MAGN_PATH, LOGGER
 CORE_NLP = 'http://nlp.stanford.edu/software/stanford-corenlp-full-2018-10-05.zip'
 GLOVE_MAGN = "http://magnitude.plasticity.ai/glove/medium/glove.840B.300d.magnitude"
@@ -35,6 +36,7 @@ def check_errors():
 
 
 def init():
+    logging.setup()
     LOGGER.info('Running... (this takes a while, do not abort)')
     old_cwd = os.getcwd()
     _cwd_to_here()
