@@ -16,7 +16,7 @@ import gzip
 import shutil
 import spacy
 from cdcr.config import GLOVE_MAGN_PATH, LOGGER
-CORE_NLP = 'http://nlp.stanford.edu/software/stanford-corenlp-full-2018-10-05.zip'
+CORE_NLP = 'https://nlp.stanford.edu/software/stanford-corenlp-4.5.4.zip'
 GLOVE_MAGN = "http://magnitude.plasticity.ai/glove/medium/glove.840B.300d.magnitude"
 
 def check_errors():
@@ -25,7 +25,7 @@ def check_errors():
 
     errors = {
         "python": sys.version_info < (3, 6) or sys.version_info >= (3, 8),
-        "corenlp": not os.path.isdir('./resources/corenlp/stanford-corenlp-full-2018-10-05'),
+        "corenlp": not os.path.isdir('./resources/corenlp/stanford-corenlp-4.5.4'),
         "evaluation": not os.path.isdir('./resources/evaluation_results'),
         "wordvectors": not os.path.isfile(GLOVE_MAGN_PATH)
     }
