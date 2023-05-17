@@ -275,10 +275,24 @@ class CandidatePhrasesExtractor:
     @staticmethod
     def find_phrase_tokens(doc, mention, search_window=0):
         small_phrase = [t.lower() for t in mention.tokens_str.split(" ")]
-        if search_window:
-            sents = doc.sentences[max(mention.sent_id - search_window, 0): mention.sent_id + search_window + 1]
-        elif mention.sent_id < 0:
+        
+        # special pre-check if the mention token numbers are identified
+        if (len(mention.tokens_number)):
+            # look up tokens directly
+            maybe_sent_id, sent_mention_tokens = CandidatePhrasesExtractor.find_sentence_mention_tokens(doc.sentences, mention)
+            mention_phrase = CandidatePhrasesExtractor.build_phrase(mention.tokens_str)
+            found_phrase = CandidatePhrasesExtractor.build_phrase(*[t.word for t in sent_mention_tokens]) if sent_mention_tokens else None
+            # exit early if we found a match!
+            if found_phrase == mention_phrase:
+                return maybe_sent_id, sent_mention_tokens
+            # otherwise, set the sent_id (if missing) and continue with finding the phrase
+            elif maybe_sent_id and mention.sent_id < 0:
+                mention.sent_id = maybe_sent_id
+        
+        if mention.sent_id < 0:
             sents = doc.sentences
+        elif search_window:
+            sents = doc.sentences[max(mention.sent_id - search_window, 0): mention.sent_id + search_window + 1]
         else:
             sents = [doc.sentences[mention.sent_id]]
 
@@ -289,11 +303,13 @@ class CandidatePhrasesExtractor:
             k = 0
             search = True
             while search and k < len(main_phrase):
+                small_split = re.split(r'\W', small_phrase[m])
+                main_split = re.split(r'\W', main_phrase[k])
                 if small_phrase[m] == main_phrase[k]:
                     sim.append(small_phrase[m])
                     m += 1
                 # elif len(small_phrase[m]) >= 4 and small_phrase[m] in main_phrase[k]:
-                elif re.split(r'\W', small_phrase[m])[0] == re.split(r'\W', main_phrase[k])[0]:
+                elif small_split[0] == main_split[0]:
                     sim.append(small_phrase[m])
                     m += 1
                 # elif len(main_phrase[k]) >= 4 and main_phrase[k] in small_phrase[m]:
