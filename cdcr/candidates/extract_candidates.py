@@ -331,7 +331,8 @@ class CandidatePhrasesExtractor:
         doc_dict = {doc.source_domain: doc for doc in self.docs}
         annot_candidates = CandidateSet(OriginType.ANNOTATED, self.params.coref_extraction_strategy)
 
-        for file in os.listdir(self.params.annot_path):
+        # iterate over all files in the annotation folder, ignoring hidden files
+        for file in [f for f in os.listdir(self.params.annot_path) if not f.startswith('.')]:
 
             with open(os.path.join(self.params.annot_path, file), "rb") as json_file:
                 annotations = json.load(json_file)
