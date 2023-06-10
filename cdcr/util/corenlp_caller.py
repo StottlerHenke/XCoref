@@ -45,8 +45,15 @@ class CoreNLPCaller:
         while try_again:
             try:
                 if len(text) > 0:
+                    corenlp_props = self.NLP_CLIENT_SETTINGS["properties"]
+                    # explicitly merge any provided 'properties' with those of NLP_CLIENT_SETTINGS,
+                    # otherwise **-unpacking will overwrite NLP_CLIENT_SETTINGS
+                    if (corenlp_settings["properties"]):
+                        corenlp_props = { **self.NLP_CLIENT_SETTINGS["properties"], **corenlp_settings["properties"] }
                     corenlp_settings = { **self.NLP_CLIENT_SETTINGS, **corenlp_settings }
                     corenlp_settings["annotators"] = annotators
+                    # replace the 'properties' with the merged propeties
+                    corenlp_settings["properties"] = corenlp_props
                     with CoreNLPClient(**corenlp_settings, timeout=360*1000) as client:
                         output = client.annotate(text)
                     try_again = True

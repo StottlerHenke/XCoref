@@ -479,16 +479,18 @@ class CandidatePhrasesExtractor:
             text = ""
 
             for doc in self.docs[doc_group * self.params.max_doc_num : min(len(self.docs), (doc_group + 1) * self.params.max_doc_num)]:
-                num_tokens = len(list(doc.all_tokens()))
-                text += doc.fulltext + " \n"
+                num_sentences = len(list(doc.all_tokens()))
+                # explicitly insert a newline between the text of different documents
+                text += doc.fulltext + " \n\n"
                 mapping_df = mapping_df.append(pd.DataFrame({
-                    ORIG_SENT: list(range(num_tokens)),
-                    ORIG_DOC: [doc.id] * num_tokens
-                }, index=[sent for sent in range(overall_sent_ind, overall_sent_ind + num_tokens)]))
-                overall_sent_ind += num_tokens
+                    ORIG_SENT: list(range(num_sentences)),
+                    ORIG_DOC: [doc.id] * num_sentences
+                }, index=[sent for sent in range(overall_sent_ind, overall_sent_ind + num_sentences)]))
+                overall_sent_ind += num_sentences
 
-            output = corenlp.execute(text, annotators='tokenize, ssplit, pos, depparse, parse, ner, coref',
-                                     coref="neural")
+            output = corenlp.execute(text, annotators='tokenize, ssplit, pos, depparse, parse, ner, coref', coref="neural", 
+                                     # explicitly split sentences on newlines (which were appended between docs, above)
+                                     properties= {'ssplit.newlineIsSentenceBreak': 'always'})
 
             if len(output.sentences) != overall_sent_ind:
                 self._logger.warning(NOTIFICATION_MESSAGES["number_dismatch"])
