@@ -26,7 +26,8 @@ class ParamsCand(ParamsHelperClass):
     def read_annot(self, topic, annot_index=-1):
         if ANNOTATION in os.listdir(os.path.join(ORIGINAL_DATA_PATH, topic)):
             annot_path = os.path.join(ORIGINAL_DATA_PATH, topic, ANNOTATION)
-            folder_list = os.listdir(annot_path)
+            # get and sort all subfolders of the annotation folder, ignoring hidden files
+            folder_list = sorted((f for f in os.listdir(annot_path) if not f.startswith(".")), key=str.lower)
             try:
                 self.annot_path = os.path.join(annot_path, folder_list[annot_index])
                 self.annot_index = annot_index

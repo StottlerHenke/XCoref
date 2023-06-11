@@ -201,13 +201,54 @@ class CandidatePhrasesExtractor:
         return cand_set
 
     @staticmethod
+    def build_phrase(*tokens):
+        return re.sub(r'\s+', " ", re.sub(r'\W', " ", " ".join([t.lower() for t in tokens]))).strip()
+
+    @staticmethod
+    def find_sentence_mention_tokens(sents, mention):
+        # if the mention includes token numbers, find that sentence and the corresponding tokens
+        if (len(mention.tokens_number)):
+            sent_token_idx = 0
+            for i, sent in enumerate(sents):
+                    sent_tokens = len(sent.tokens)
+                    # is the first token of the mention in this sentence?
+                    if mention.tokens_number[0] >= sent_token_idx \
+                            and mention.tokens_number[0] < (sent_token_idx + sent_tokens):
+                        first_token_sent_idx = mention.tokens_number[0] - sent_token_idx
+                        last_token_sent_idx = mention.tokens_number[-1] - sent_token_idx
+                        sent_tokens = sent.tokens[first_token_sent_idx : (last_token_sent_idx + 1)]
+                        return sent.index, sent_tokens
+                    # otherwise, update the sentence token index and move to the next sentence
+                    else:
+                        sent_token_idx += sent_tokens
+        # no match found
+        return None, None
+
+    @staticmethod
     def find_phrase(doc, mention, search_window=0):
         # small_phrase = [t.lower() for t in mention.tokens_str.split(" ")]
-        if search_window:
+
+        # special pre-check if the mention token numbers are identified
+        if (len(mention.tokens_number)):
+            # look up tokens directly
+            maybe_sent_id, sent_mention_tokens = CandidatePhrasesExtractor.find_sentence_mention_tokens(doc.sentences, mention)
+            mention_phrase = CandidatePhrasesExtractor.build_phrase(mention.tokens_str)
+            found_phrase = CandidatePhrasesExtractor.build_phrase(*[t.word for t in sent_mention_tokens]) if sent_mention_tokens else None
+            # exit early if we found a match!
+            if found_phrase == mention_phrase:
+                return maybe_sent_id, sent_mention_tokens
+            # otherwise, set the sent_id (if missing) and continue with finding the phrase
+            elif maybe_sent_id and mention.sent_id < 0:
+                mention.sent_id = maybe_sent_id
+        
+        if mention.sent_id < 0:
+            sents = doc.sentences
+        elif search_window:
             sents = doc.sentences[max(mention.sent_id - search_window, 0): mention.sent_id + search_window + 1]
         else:
             sents = [doc.sentences[mention.sent_id]]
 
+        # search the sentence text and try to find a match by token
         # mention_proc = re.sub(r'\s+', " ", re.sub(r'\W', " ", mention.tokens_str.lower()))
         # mention_proc = re.sub(r'\W', " ", mention.tokens_str.lower().replace(" 's", "'s"))
         mention_proc = mention.tokens_str
@@ -234,7 +275,23 @@ class CandidatePhrasesExtractor:
     @staticmethod
     def find_phrase_tokens(doc, mention, search_window=0):
         small_phrase = [t.lower() for t in mention.tokens_str.split(" ")]
-        if search_window:
+        
+        # special pre-check if the mention token numbers are identified
+        if (len(mention.tokens_number)):
+            # look up tokens directly
+            maybe_sent_id, sent_mention_tokens = CandidatePhrasesExtractor.find_sentence_mention_tokens(doc.sentences, mention)
+            mention_phrase = CandidatePhrasesExtractor.build_phrase(mention.tokens_str)
+            found_phrase = CandidatePhrasesExtractor.build_phrase(*[t.word for t in sent_mention_tokens]) if sent_mention_tokens else None
+            # exit early if we found a match!
+            if found_phrase == mention_phrase:
+                return maybe_sent_id, sent_mention_tokens
+            # otherwise, set the sent_id (if missing) and continue with finding the phrase
+            elif maybe_sent_id and mention.sent_id < 0:
+                mention.sent_id = maybe_sent_id
+        
+        if mention.sent_id < 0:
+            sents = doc.sentences
+        elif search_window:
             sents = doc.sentences[max(mention.sent_id - search_window, 0): mention.sent_id + search_window + 1]
         else:
             sents = [doc.sentences[mention.sent_id]]
@@ -246,11 +303,13 @@ class CandidatePhrasesExtractor:
             k = 0
             search = True
             while search and k < len(main_phrase):
+                small_split = re.split(r'\W', small_phrase[m])
+                main_split = re.split(r'\W', main_phrase[k])
                 if small_phrase[m] == main_phrase[k]:
                     sim.append(small_phrase[m])
                     m += 1
                 # elif len(small_phrase[m]) >= 4 and small_phrase[m] in main_phrase[k]:
-                elif re.split(r'\W', small_phrase[m])[0] == re.split(r'\W', main_phrase[k])[0]:
+                elif small_split[0] == main_split[0]:
                     sim.append(small_phrase[m])
                     m += 1
                 # elif len(main_phrase[k]) >= 4 and main_phrase[k] in small_phrase[m]:
@@ -272,7 +331,8 @@ class CandidatePhrasesExtractor:
         doc_dict = {doc.doc_id: doc for doc in self.docs}
         annot_candidates = CandidateSet(OriginType.ANNOTATED, self.params.coref_extraction_strategy)
 
-        for file in os.listdir(self.params.annot_path):
+        # iterate over all files in the annotation folder, ignoring hidden files
+        for file in [f for f in os.listdir(self.params.annot_path) if not f.startswith('.')]:
 
             with open(os.path.join(self.params.annot_path, file), "rb") as json_file:
                 annotations = json.load(json_file)
@@ -290,6 +350,7 @@ class CandidatePhrasesExtractor:
                 if mention.sent_id < len(doc.sentences):
                     sent_id, tokens = CandidatePhrasesExtractor.find_phrase(doc, mention)
 
+                # try with a search window
                 if mention.sent_id >= len(doc.sentences) or tokens is None:
                     sent_id, tokens = CandidatePhrasesExtractor.find_phrase(doc, mention, SEARCH_WINDOW)
 
@@ -312,8 +373,8 @@ class CandidatePhrasesExtractor:
                     self._logger.warning(NOTIFICATION_MESSAGES["no_tokens"])
                     continue
 
-                annot_phrase = re.sub(r'\s+', " ", re.sub(r'\W', " ", mention.tokens_str.lower())).strip()
-                found_phrase = re.sub(r'\s+', " ", re.sub(r'\W', " ", " ".join([t.word.lower() for t in tokens]))).strip()
+                annot_phrase = CandidatePhrasesExtractor.build_phrase(mention.tokens_str)
+                found_phrase = CandidatePhrasesExtractor.build_phrase(*[t.word for t in tokens])
                 if not len(found_phrase.strip()):
                     self._logger.warning(NOTIFICATION_MESSAGES["no_tokens"])
                     continue

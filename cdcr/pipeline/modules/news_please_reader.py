@@ -38,14 +38,16 @@ class NewsPleaseReader:
 
         articles = []
         for file in os.listdir(path):
-            file = os.path.join(path, file)
-            if file.endswith('json'):
-                file = json.load(open(file, "r", encoding="utf8"))
-            elif file.endswith('pickle'):
-                file = pickle.load(open(file, "r"))
-            elif os.path.isdir(file):
-                continue
-            articles.append(file)
+            # ignore hidden files (i.e., .DS_Store)
+            if not file.startswith('.'):
+                file = os.path.join(path, file)
+                if file.endswith('json'):
+                    file = json.load(open(file, "r", encoding="utf8"))
+                elif file.endswith('pickle'):
+                    file = pickle.load(open(file, "r"))
+                elif os.path.isdir(file):
+                    continue
+                articles.append(file)
 
         # add documents to the document set
         for article in articles:
