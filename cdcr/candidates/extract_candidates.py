@@ -269,7 +269,7 @@ class CandidatePhrasesExtractor:
         if self.params.annot_path is None or self.params.origin_type == OriginType.EXTRACTED:
             return CandidateSet(OriginType.ANNOTATED, self.params.coref_extraction_strategy)
 
-        doc_dict = {doc.source_domain: doc for doc in self.docs}
+        doc_dict = {doc.doc_id: doc for doc in self.docs}
         annot_candidates = CandidateSet(OriginType.ANNOTATED, self.params.coref_extraction_strategy)
 
         for file in os.listdir(self.params.annot_path):
