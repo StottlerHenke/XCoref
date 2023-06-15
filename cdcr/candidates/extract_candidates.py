@@ -256,7 +256,8 @@ class CandidatePhrasesExtractor:
             # sent_proc = re.sub(r'\s+', " ", re.sub(r'\W', " ", sent.text.lower()))
             # sent_proc = re.sub(r'\W', " ", sent.text.lower())
             sent_proc = sent.text
-            for str_mention in re.finditer(mention_proc.replace("(", "<").replace(")", ">"),
+            mention_pattern = re.escape(mention_proc.replace("(", "<").replace(")", ">"))
+            for str_mention in re.finditer(mention_pattern,
                                            sent_proc.replace("(", "<").replace(")", ">")):
                 segm_index_start = str_mention.start()
 
